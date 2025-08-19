@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PromotionStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+}
+
+model Promotion {
+  id          String           @id @db.Uuid
+  title       String
+  description String?
+  status      PromotionStatus
+  startsAt    DateTime
+  endsAt      DateTime?
+  updatedAt   DateTime         @updatedAt
+  version     Int              @default(1)
+  tenantId    String?
+
+  @@index([status, startsAt, endsAt])
+}
+
+model PromotionEvent {
+  eventId     String  @id
+  promotionId String  @db.Uuid
+  type        String
+  payload     Json
+  occurredAt  DateTime @default(now())
+
+  @@index([promotionId])
+}
+
+model MaterializedActivePromotion {
+  promotionId String  @id @db.Uuid
+  title       String
+  startsAt    DateTime
+  endsAt      DateTime?
+  tenantId    String?
+}
